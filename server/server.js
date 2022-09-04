@@ -3,7 +3,7 @@ const { ApolloServer,gql } = require("apollo-server");
 const typeDefs = gql`
     type Query{
         greeting:String
-    }
+    },
 `;
 
 const resolvers = {
@@ -17,6 +17,8 @@ const server = new ApolloServer({
 })
 
 
-server.listen({port:9000}).then(info=>console.log(`Server running on ${info.url}`)).catch(err=>console.log(err));
+server.listen({port:9000})
+.then(info=>console.log(`Server running on ${info.url}`))
+.catch(err=>console.log(err));
 
 
