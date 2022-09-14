@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model brands {
+  brand_id   Int        @id @default(autoincrement())
+  brand_name String     @db.VarChar(255)
+  products   products[]
+}
+
+model categories {
+  category_id   Int        @id @default(autoincrement())
+  category_name String     @db.VarChar(255)
+  products      products[]
+}
+
+model customers {
+  customer_id Int      @id @default(autoincrement())
+  first_name  String   @db.VarChar(255)
+  last_name   String   @db.VarChar(255)
+  phone       String?  @db.VarChar(25)
+  email       String   @db.VarChar(255)
+  street      String?  @db.VarChar(255)
+  city        String?  @db.VarChar(50)
+  state       String?  @db.VarChar(25)
+  zip_code    String?  @db.VarChar(5)
+  orders      orders[]
+}
+
+model order_items {
+  order_id   Int
+  item_id    Int
+  product_id Int
+  quantity   Int
+  list_price Decimal  @db.Decimal(10, 2)
+  discount   Decimal  @default(0.00) @db.Decimal(4, 2)
+  orders     orders   @relation(fields: [order_id], references: [order_id], onDelete: Cascade, map: "order_items_ibfk_1")
+  products   products @relation(fields: [product_id], references: [product_id], onDelete: Cascade, map: "order_items_ibfk_2")
+
+  @@id([order_id, item_id])
+  @@index([product_id], map: "product_id")
+}
+
+model orders {
+  order_id       Int           @id @default(autoincrement())
+  customer_id    Int?
+  order_status   Int           @db.TinyInt
+  order_date     DateTime      @db.Date
+  required_date  DateTime      @db.Date
+  shipped_date   DateTime?     @db.Date
+  customers      customers?    @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade, map: "orders_ibfk_1")
+  order_items    order_items[]
+  storesStore_id Int?
+
+  @@index([customer_id], map: "customer_id")
+}
+
+model products {
+  product_id   Int           @id @default(autoincrement())
+  product_name String        @db.VarChar(255)
+  brand_id     Int
+  category_id  Int
+  model_year   Int           @db.SmallInt
+  list_price   Decimal       @db.Decimal(10, 2)
+  categories   categories    @relation(fields: [category_id], references: [category_id], onDelete: Cascade, map: "products_ibfk_1")
+  brands       brands        @relation(fields: [brand_id], references: [brand_id], onDelete: Cascade, map: "products_ibfk_2")
+  order_items  order_items[]
+  stocks       stocks[]
+
+  @@index([brand_id], map: "brand_id")
+  @@index([category_id], map: "category_id")
+}
+
+model stocks {
+  product_id Int
+  quantity   Int?
+  products   products @relation(fields: [product_id], references: [product_id], onDelete: Cascade, map: "stocks_ibfk_1")
+
+  @@id([product_id])
+  @@index([product_id], map: "product_id")
+}
